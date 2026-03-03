@@ -425,6 +425,13 @@ function addTransaction() {
     updateUI();
     document.getElementById('amount').value = '';
     document.getElementById('description').value = '';
+
+    // Auto-save to Drive if connected
+    if (driveAccessToken) {
+        setSync('⏫ جارٍ الحفظ التلقائي على Drive...', 'syncing');
+        saveToDrive(true);
+    }
+
     alert('✅ تمت الإضافة بنجاح');
 }
 
@@ -664,8 +671,8 @@ function onAuthError(err) {
 }
 
 /* ── Save to Drive ── */
-async function saveToDrive() {
-    if (!driveAccessToken) { alert('يرجى الاتصال أولاً'); return; }
+async function saveToDrive(silent = false) {
+    if (!driveAccessToken) { if (!silent) alert('يرجى الاتصال أولاً'); return; }
     setSync('⏫ جارٍ الحفظ على Drive...', 'syncing');
 
     const content = JSON.stringify(transactions, null, 2);
@@ -718,7 +725,7 @@ async function saveToDrive() {
         }
 
         setSync('✅ تم الحفظ على Drive بنجاح — ' + new Date().toLocaleTimeString('ar'), 'connected');
-        alert('✅ تم حفظ البيانات على Google Drive بنجاح!\nاسم الملف: ' + DRIVE_FILENAME);
+        if (!silent) alert('✅ تم حفظ البيانات على Google Drive بنجاح!\nاسم الملف: ' + DRIVE_FILENAME);
     } catch(err) {
         console.error('Save error:', err);
         setSync('❌ فشل الحفظ', 'error');
